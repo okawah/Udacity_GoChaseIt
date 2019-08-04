@@ -19,16 +19,18 @@ void drive_robot(float lin_x, float ang_z)
 void process_image_callback(const sensor_msgs::Image img)
 {
 	int white_pixel = 255;
+	int one_third = img.step / 3;
+	int two_third = one_third * 2;
 	for (int i = 0; i < img.height * img.step; i++)
 	{
-		if(img.data[i] == white_pixel)
+		if(img.data[i][0] == white_pixel && img.data[i][1] == white_pixel && img.data[i][2] == white_pixel)
 		{
-			if(i / img.height < img.step / 3)
+			if(i % img.step < one_third)
 			{
 				drive_robot(0.5, 0.5);
 				break;
 			}
-			else if (i / img.height < img.step * 2 / 3)
+			else if (i % img.step < two_third)
 			{
 				drive_robot(0.5, 0);
 				break;
