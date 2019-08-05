@@ -2,6 +2,7 @@
 #include "ball_chaser/DriveToTarget.h"
 #include <sensor_msgs/Image.h>
 
+
 ros::ServiceClient client;
 
 void drive_robot(float lin_x, float ang_z)
@@ -19,29 +20,34 @@ void drive_robot(float lin_x, float ang_z)
 void process_image_callback(const sensor_msgs::Image img)
 {
 	int white_pixel = 255;
-	int one_third = img.step / 3;
+	int one_third = img.width / 3;
 	int two_third = one_third * 2;
-	for (int i = 0; i < img.height * img.step; i++)
+	ROS_INFO_STREAM("step: " << img.step << ", width: " << img.width << ", height: " << img.height);
+	
+	for (int i = 0; i < img.height * img.width; i++)
 	{
-		if(img.data[i][0] == white_pixel && img.data[i][1] == white_pixel && img.data[i][2] == white_pixel)
+		if(img.data[i * 3] == white_pixel && img.data[i * 3 + 1] == white_pixel && img.data[i * 3 + 2] == white_pixel)
 		{
-			if(i % img.step < one_third)
+			if(i % img.width < one_third)
 			{
 				drive_robot(0.5, 0.5);
+				ROS_INFO_STREAM("seeing the ball on left side");
 				break;
 			}
-			else if (i % img.step < two_third)
+			else if (i % img.width < two_third)
 			{
 				drive_robot(0.5, 0);
+				ROS_INFO_STREAM("seeing the ball in center");
 				break;
 			}
 			else
 			{
 				drive_robot(0.5, -0.5);
+				ROS_INFO_STREAM("seeing the ball on right side");
 				break;
 			}
 		}
-		if(i == img.height * img.step - 1)
+		if(i == img.height * img.width - 1)
 			drive_robot(0, 0);
 	}
 }
